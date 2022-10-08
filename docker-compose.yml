@@ -8,6 +8,7 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
