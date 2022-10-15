@@ -25,7 +25,7 @@ export class UsersService {
     };
     const result = await this.usersRepository.save(data);
     await this.producer.produce('users-streaming', {
-      message: 'user-created',
+      message: 'created',
       data: {
         name: result.name,
         role: result.role,
@@ -56,7 +56,7 @@ export class UsersService {
       }
     );
     await this.producer.produce('users-streaming', {
-      message: 'user-updated',
+      message: 'updated',
       data: {
         role: updateUserDto.role,
         uuid: user.uuid
@@ -69,7 +69,7 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({ id });
     await this.usersRepository.delete(id);
     await this.producer.produce('users-streaming', {
-      message: 'user-deleted',
+      message: 'deleted',
       data: {
         uuid: user.uuid
       }

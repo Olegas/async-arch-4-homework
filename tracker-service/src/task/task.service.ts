@@ -17,7 +17,7 @@ export class TaskService {
   async create(createTaskDto: CreateAssignedTaskDto) {
     const result = await this.taskRepository.save(createTaskDto);
     await this.producer.produce('tasks-streaming', {
-      message: 'task-created',
+      message: 'created',
       data: {
         uuid: result.uuid,
         status: result.status,
@@ -62,7 +62,7 @@ export class TaskService {
     const task = await this.taskRepository.findOneBy({ uuid });
     const result = await this.taskRepository.update({ uuid }, updateTaskDto);
     await this.producer.produce('tasks-streaming', {
-      message: 'task-updated',
+      message: 'updated',
       data: {
         uuid: task.uuid,
         status: updateTaskDto.status,

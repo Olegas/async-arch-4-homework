@@ -34,7 +34,8 @@ export class TaskController {
       status: 'in-development',
       assignee
     });
-    await this.producer.produce('task_assigned', {
+    await this.producer.produce('task_lifecycle', {
+      event: 'assigned',
       uuid: result.uuid,
       assignee
     });
@@ -71,7 +72,8 @@ export class TaskController {
     for (const task of tasks) {
       const assignee = users[(Math.random() * users.length) >> 0].uuid;
       await this.taskService.updateByUuid(task.uuid, { assignee });
-      await this.producer.produce('task_assigned', {
+      await this.producer.produce('task_lifecycle', {
+        event: 'assigned',
         uuid: task.uuid,
         assignee
       });
@@ -88,7 +90,9 @@ export class TaskController {
     if (task.assignee === currentUser.uuid) {
       if (task.status !== 'done') {
         await this.taskService.updateByUuid(uuid, { status: 'done' });
-        await this.producer.produce('task_completed', {
+        await this.producer.produce('task_lifecycle', {
+          event: 'completed',
+          assignee: task.assignee,
           uuid
         });
       }

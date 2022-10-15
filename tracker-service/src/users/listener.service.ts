@@ -17,13 +17,13 @@ export class ListenerService implements OnModuleInit {
         const payload = JSON.parse(value.toString()) as UserStreamMessages;
 
         switch (payload.message) {
-          case 'user-created':
+          case 'created':
             await this.usersService.create(payload.data);
             break;
-          case 'user-deleted':
+          case 'deleted':
             await this.usersService.removeByUuid(payload.data.uuid);
             break;
-          case 'user-updated':
+          case 'updated':
             const { uuid, role } = payload.data;
             await this.usersService.updateByUUID(uuid, { role });
         }

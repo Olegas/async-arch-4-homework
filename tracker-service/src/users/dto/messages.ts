@@ -4,7 +4,7 @@ export interface Message {
 }
 
 export interface UserCreatedMessage extends Message {
-  message: 'user-created';
+  message: 'created';
   data: {
     uuid: string;
     name: string;
@@ -13,7 +13,7 @@ export interface UserCreatedMessage extends Message {
 }
 
 export interface UserUpdatedMessage extends Message {
-  message: 'user-updated';
+  message: 'updated';
   data: {
     uuid: string;
     role: string;
@@ -21,7 +21,7 @@ export interface UserUpdatedMessage extends Message {
 }
 
 export interface UserDeletedMessage extends Message {
-  message: 'user-deleted';
+  message: 'deleted';
   data: {
     uuid: string;
   };

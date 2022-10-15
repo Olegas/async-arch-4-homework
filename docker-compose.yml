@@ -1,6 +1,39 @@
 version: '3'
 
 services:
+  auth:
+    build: ./auth-service
+    container_name: auth
+    ports:
+      - "3001:3001"
+    depends_on:
+      - broker
+      - postgres
+    environment:
+      PORT: 3001
+      DB_NAME: auth
+      DB_HOST: postgres
+      KAFKA_BROKER: broker:9092
+      SALT: cafebabe
+      TOKEN_SIGN_KEY: baadfood
+
+  tracker:
+    build: ./tracker-service
+    container_name: tracker
+    ports:
+      - "3002:3002"
+    depends_on:
+      - broker
+      - postgres
+      - auth
+    environment:
+      PORT: 3002
+      DB_NAME: tracker
+      DB_HOST: postgres
+      KAFKA_BROKER: broker:9092
+      KAFKA_GROUP: uber-popug-tracker
+      AUTH_SERVICE_HOSTNAME: auth:3001
+
   postgres:
     image: postgres
     container_name: postgres
@@ -32,7 +65,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_INTERNAL://broker:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
