@@ -2,10 +2,12 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   NotFoundException,
+  Param,
   Post
 } from '@nestjs/common';
-import { LoginParams, VerifyParams } from './dto/auth.dto';
+import { LoginParams } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { generateToken, verifyToken } from '../lib/token';
 
@@ -25,9 +27,8 @@ export class AuthController {
     throw new NotFoundException();
   }
 
-  @Post('verify')
-  async verify(@Body() body: VerifyParams) {
-    const { token } = body;
+  @Get('verify/:token')
+  async verify(@Param('token') token: string) {
     const decodedData = await verifyToken(token);
     if (decodedData) {
       return decodedData;

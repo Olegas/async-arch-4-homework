@@ -5,6 +5,7 @@ import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { KafkaModule } from './kafka/kafka.module';
 import { AliveController } from './alive/alive.controller';
+import { SchemaModule } from './schema/schema.module';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { AliveController } from './alive/alive.controller';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
-      port: +(process.env.DB_HOST || 5432),
+      port: +(process.env.DB_PORT || 5432),
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME,
@@ -20,7 +21,8 @@ import { AliveController } from './alive/alive.controller';
       synchronize: true
     }),
     AuthModule,
-    KafkaModule
+    KafkaModule,
+    SchemaModule
   ],
   controllers: [AliveController],
   providers: []

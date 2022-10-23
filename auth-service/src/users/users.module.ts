@@ -4,9 +4,10 @@ import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { KafkaModule } from '../kafka/kafka.module';
+import { SchemaModule } from '../schema/schema.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), KafkaModule],
+  imports: [TypeOrmModule.forFeature([User]), KafkaModule, SchemaModule],
   controllers: [UsersController],
   providers: [UsersService]
 })
