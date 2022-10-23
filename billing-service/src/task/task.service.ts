@@ -16,6 +16,7 @@ export class TaskService {
     return this.taskRepository.save({
       uuid: createTaskDto.uuid,
       title: createTaskDto.title,
+      jiraId: createTaskDto.jiraId,
       priceAssign: Math.random() * 10 - 20,
       priceComplete: Math.random() * 20 + 20
     });

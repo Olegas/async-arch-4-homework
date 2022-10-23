@@ -86,7 +86,10 @@ export class ListenerService implements OnModuleInit, OnApplicationShutdown {
     return this.safeHandler(async (event: Event) => {
       switch (event.event) {
         case 'created':
-          await this.tasksService.create(event.payload as TaskCreatedMessage);
+          // Consume only v2 version in new code
+          if (event.version === '2') {
+            await this.tasksService.create(event.payload as TaskCreatedMessage);
+          }
           break;
       }
     });

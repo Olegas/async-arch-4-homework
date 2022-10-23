@@ -17,15 +17,24 @@ export class TaskService {
   ) {}
 
   async create(createTaskDto: CreateAssignedTaskDto) {
+    const { title } = createTaskDto;
+    const reJiraId = /^\[([^\]]+)]/;
+    const matchJiraId = title.match(reJiraId);
+    if (matchJiraId) {
+      createTaskDto.jiraId = matchJiraId[1];
+      createTaskDto.title = createTaskDto.title.replace(reJiraId, '');
+    }
     const result = await this.taskRepository.save(createTaskDto);
+    // TODO put publishing to the transaction to rollback changes if event is not published correctly
     const event = {
       topic: 'tasks-streaming',
       event: 'created',
-      version: '1',
+      version: '2',
       payload: {
         uuid: result.uuid,
         status: result.status,
         title: result.title,
+        jiraId: result.jiraId,
         description: result.description,
         assignee: result.assignee
       }

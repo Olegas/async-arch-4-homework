@@ -111,6 +111,7 @@ export class TaskController {
     const task = await this.taskService.findOne(uuid);
     if (task.assignee === currentUser.uuid || currentUser.role === 'admin') {
       if (task.status !== 'done') {
+        // TODO put publishing to the transaction to rollback changes if event is not published correctly
         await this.taskService.updateByUuid(uuid, { status: 'done' });
         const payload = {
           assignee: task.assignee,
