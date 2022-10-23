@@ -14,6 +14,9 @@ export class Task {
   @Column()
   title: string;
 
+  @Column({ nullable: true })
+  jiraId: string;
+
   @Column()
   description: string;
 

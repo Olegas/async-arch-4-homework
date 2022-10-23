@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "User deleted message, V1.",
+  "description": "Notification user entity was deleted",
+  "type": "object",
+  "properties": {
+    "uuid": {
+      "type": "string"
+    }
+  },
+  "required": ["uuid"]
+}

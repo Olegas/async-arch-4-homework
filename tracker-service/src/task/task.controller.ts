@@ -16,6 +16,7 @@ import { CurrentUser } from '../current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
+import { SchemaService } from '../schema/schema.service';
 
 @Controller('task')
 @UseGuards(RolesGuard)
@@ -23,7 +24,8 @@ export class TaskController {
   constructor(
     private readonly taskService: TaskService,
     private readonly producer: ProducerService,
-    private readonly userService: UsersService
+    private readonly userService: UsersService,
+    private readonly validator: SchemaService
   ) {}
 
   @Post()
@@ -34,11 +36,21 @@ export class TaskController {
       status: 'in-development',
       assignee
     });
-    await this.producer.produce('task_lifecycle', {
-      event: 'assigned',
+    const payload = {
       uuid: result.uuid,
       assignee
-    });
+    };
+    const event = {
+      topic: 'task_lifecycle',
+      event: 'assigned',
+      version: '1',
+      payload
+    };
+    const isValid = await this.validator.validateSchema(event);
+    if (!isValid) {
+      throw new Error('Incorrect schema');
+    }
+    await this.producer.produce(event);
     return result;
   }
 
@@ -72,11 +84,21 @@ export class TaskController {
     for (const task of tasks) {
       const assignee = users[(Math.random() * users.length) >> 0].uuid;
       await this.taskService.updateByUuid(task.uuid, { assignee });
-      await this.producer.produce('task_lifecycle', {
-        event: 'assigned',
+      const payload = {
         uuid: task.uuid,
         assignee
-      });
+      };
+      const event = {
+        topic: 'task_lifecycle',
+        event: 'assigned',
+        version: '1',
+        payload
+      };
+      const isValid = await this.validator.validateSchema(event);
+      if (!isValid) {
+        throw new Error('Incorrect schema');
+      }
+      await this.producer.produce(event);
     }
     // TODO unlock
   }
@@ -87,14 +109,25 @@ export class TaskController {
     @CurrentUser() currentUser: User
   ) {
     const task = await this.taskService.findOne(uuid);
-    if (task.assignee === currentUser.uuid) {
+    if (task.assignee === currentUser.uuid || currentUser.role === 'admin') {
       if (task.status !== 'done') {
+        // TODO put publishing to the transaction to rollback changes if event is not published correctly
         await this.taskService.updateByUuid(uuid, { status: 'done' });
-        await this.producer.produce('task_lifecycle', {
-          event: 'completed',
+        const payload = {
           assignee: task.assignee,
           uuid
-        });
+        };
+        const event = {
+          topic: 'task_lifecycle',
+          event: 'completed',
+          version: '1',
+          payload
+        };
+        const isValid = await this.validator.validateSchema(event);
+        if (!isValid) {
+          throw new Error('Incorrect schema');
+        }
+        await this.producer.produce(event);
       }
       return 'ok';
     }

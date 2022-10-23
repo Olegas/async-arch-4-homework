@@ -5,27 +5,45 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { ProducerService } from '../kafka/producer.service';
+import { SchemaService } from '../schema/schema.service';
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
-    private producer: ProducerService
+    private producer: ProducerService,
+    private validator: SchemaService
   ) {}
 
   async create(createTaskDto: CreateAssignedTaskDto) {
+    const { title } = createTaskDto;
+    const reJiraId = /^\[([^\]]+)]/;
+    const matchJiraId = title.match(reJiraId);
+    if (matchJiraId) {
+      createTaskDto.jiraId = matchJiraId[1];
+      createTaskDto.title = createTaskDto.title.replace(reJiraId, '');
+    }
     const result = await this.taskRepository.save(createTaskDto);
-    await this.producer.produce('tasks-streaming', {
-      message: 'created',
-      data: {
+    // TODO put publishing to the transaction to rollback changes if event is not published correctly
+    const event = {
+      topic: 'tasks-streaming',
+      event: 'created',
+      version: '2',
+      payload: {
         uuid: result.uuid,
         status: result.status,
         title: result.title,
+        jiraId: result.jiraId,
         description: result.description,
         assignee: result.assignee
       }
-    });
+    };
+    const isValid = await this.validator.validateSchema(event);
+    if (!isValid) {
+      throw new Error('Incorrect schema');
+    }
+    await this.producer.produce(event);
     return result;
   }
 
@@ -61,19 +79,22 @@ export class TaskService {
   async updateByUuid(uuid: string, updateTaskDto: UpdateTaskDto) {
     const task = await this.taskRepository.findOneBy({ uuid });
     const result = await this.taskRepository.update({ uuid }, updateTaskDto);
-    await this.producer.produce('tasks-streaming', {
-      message: 'updated',
-      data: {
+    const event = {
+      topic: 'tasks-streaming',
+      event: 'updated',
+      version: '1',
+      payload: {
         uuid: task.uuid,
         status: updateTaskDto.status,
         title: task.title,
         description: task.description
       }
-    });
+    };
+    const isValid = await this.validator.validateSchema(event);
+    if (!isValid) {
+      throw new Error('Incorrect schema');
+    }
+    await this.producer.produce(event);
     return result;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} task`;
   }
 }

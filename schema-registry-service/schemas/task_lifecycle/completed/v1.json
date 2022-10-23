@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Task completed lifecycle message, V1.",
+  "description": "Notification task was completed",
+  "type": "object",
+  "properties": {
+    "uuid": {
+      "type": "string"
+    },
+    "assignee": {
+      "type": "string"
+    }
+  },
+  "required": ["assignee", "uuid"]
+}

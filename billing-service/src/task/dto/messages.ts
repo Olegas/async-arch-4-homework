@@ -2,6 +2,7 @@ export interface TaskCreatedMessage {
   uuid: string;
   title: string;
   description: string;
+  jiraId: string;
 }
 
 export interface TaskAssignedMessage {
