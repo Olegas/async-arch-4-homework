@@ -5,9 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
 import { KafkaModule } from '../kafka/kafka.module';
 import { UsersModule } from '../users/users.module';
+import { SchemaModule } from '../schema/schema.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task]), KafkaModule, UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Task]),
+    KafkaModule,
+    UsersModule,
+    SchemaModule
+  ],
   controllers: [TaskController],
   providers: [TaskService]
 })

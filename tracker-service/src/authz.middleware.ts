@@ -11,16 +11,7 @@ export class AuthzMiddleware implements NestMiddleware {
     const token = (req.header('Authorization') || '').replace('Bearer ', '');
     if (token) {
       const verifyResponse = await fetch(
-        `http://${process.env.AUTH_SERVICE_HOSTNAME}/auth/verify`,
-        {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify({
-            token
-          })
-        }
+        `http://${process.env.AUTH_SERVICE_HOSTNAME}/auth/verify/${token}`
       );
       if (verifyResponse.status === 200) {
         const { id } = await verifyResponse.json();

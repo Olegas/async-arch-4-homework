@@ -11,7 +11,7 @@ export class ConsumerService implements OnApplicationShutdown {
 
   async consume(topic: string, config: ConsumerRunConfig) {
     const consumer = this.kafka.consumer({
-      groupId: process.env.KAFKA_GROUP
+      groupId: `${process.env.KAFKA_GROUP}--${topic}`
     });
     await consumer.connect();
     await consumer.subscribe({

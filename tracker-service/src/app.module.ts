@@ -6,13 +6,14 @@ import { UsersModule } from './users/users.module';
 import { TaskModule } from './task/task.module';
 import { Task } from './task/entities/task.entity';
 import { AuthzMiddleware } from './authz.middleware';
+import { SchemaModule } from './schema/schema.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
-      port: +(process.env.DB_HOST || 5432),
+      port: +(process.env.DB_PORT || 5432),
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME,
@@ -21,7 +22,8 @@ import { AuthzMiddleware } from './authz.middleware';
     }),
     KafkaModule,
     UsersModule,
-    TaskModule
+    TaskModule,
+    SchemaModule
   ],
   controllers: [],
   providers: []
