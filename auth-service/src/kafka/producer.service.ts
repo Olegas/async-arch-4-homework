@@ -4,6 +4,14 @@ import {
   OnModuleInit
 } from '@nestjs/common';
 import { Kafka } from 'kafkajs';
+import { nanoid } from 'nanoid';
+
+interface ProduceArgs {
+  topic: string;
+  event: string;
+  version: string;
+  payload: Record<string, any>;
+}
 
 @Injectable()
 export class ProducerService implements OnModuleInit, OnApplicationShutdown {
@@ -13,12 +21,17 @@ export class ProducerService implements OnModuleInit, OnApplicationShutdown {
 
   private readonly producer = this.kafka.producer();
 
-  async produce(topic: string, message: Record<string, any>) {
+  async produce({ topic, event, version, payload }: ProduceArgs) {
     await this.producer.send({
       topic,
       messages: [
         {
-          value: JSON.stringify(message)
+          headers: {
+            id: nanoid(),
+            version,
+            event
+          },
+          value: JSON.stringify(payload)
         }
       ]
     });

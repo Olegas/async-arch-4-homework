@@ -1,6 +1,31 @@
 version: '3'
 
 services:
+  schema-registry:
+    build: schema-registry-service
+    container_name: schema-registry
+    ports:
+      - "3000:80"
+
+  billing:
+    build: ./billing-service
+    container_name: billing
+    ports:
+      - "3003:3003"
+    depends_on:
+      - broker
+      - postgres
+      - schema-registry
+      - auth
+    environment:
+      PORT: 3003
+      DB_NAME: billing
+      DB_HOST: postgres
+      KAFKA_BROKER: broker:9092
+      KAFKA_GROUP: uber-popug-billing
+      AUTH_SERVICE_HOSTNAME: auth:3001
+      SCHEMA_SERVICE_HOSTNAME: schema-registry:80
+
   auth:
     build: ./auth-service
     container_name: auth
@@ -9,6 +34,7 @@ services:
     depends_on:
       - broker
       - postgres
+      - schema-registry
     environment:
       PORT: 3001
       DB_NAME: auth
@@ -16,6 +42,7 @@ services:
       KAFKA_BROKER: broker:9092
       SALT: cafebabe
       TOKEN_SIGN_KEY: baadfood
+      SCHEMA_SERVICE_HOSTNAME: schema-registry:80
 
   tracker:
     build: ./tracker-service
@@ -26,6 +53,7 @@ services:
       - broker
       - postgres
       - auth
+      - schema-registry
     environment:
       PORT: 3002
       DB_NAME: tracker
@@ -33,6 +61,7 @@ services:
       KAFKA_BROKER: broker:9092
       KAFKA_GROUP: uber-popug-tracker
       AUTH_SERVICE_HOSTNAME: auth:3001
+      SCHEMA_SERVICE_HOSTNAME: schema-registry:80
 
   postgres:
     image: postgres

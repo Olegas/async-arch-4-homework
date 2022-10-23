@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Task updated message, V1.",
+  "description": "Notification task entity was updated",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "string"
+    }
+  },
+  "required": ["title", "status", "description", "uuid"]
+}
